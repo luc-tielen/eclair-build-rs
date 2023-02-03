@@ -9,57 +9,56 @@ use std::process::Command;
 use which::which;
 
 struct NoFileYet;
-struct WithEclairFile(String);
+struct WithEclairFile<'a>(&'a str);
 
-struct Build<T = NoFileYet> {
-    // TODO use str?
-    clang_compiler: String,
-    eclair_compiler: String,
-    datalog_dir: Option<String>, // TODO remove once Eclair is fully self-hosted
+struct Build<'a, T = NoFileYet> {
+    clang_compiler: &'a str,
+    eclair_compiler: &'a str,
+    datalog_dir: Option<&'a str>, // TODO remove once Eclair is fully self-hosted
     eclair_file: T,
 }
 
-impl Build<NoFileYet> {
+impl<'a> Build<'a, NoFileYet> {
     pub fn new() -> Self {
         Build {
-            clang_compiler: "clang".to_string(),
-            eclair_compiler: "eclair".to_string(),
+            clang_compiler: "clang",
+            eclair_compiler: "eclair",
             eclair_file: NoFileYet,
             datalog_dir: None,
         }
     }
 
     // NOTE: Only one file allowed for now.
-    pub fn file(self, path: impl Into<String>) -> Build<WithEclairFile> {
+    pub fn file(self, path: &str) -> Build<'a, WithEclairFile> {
         Build {
             clang_compiler: self.clang_compiler,
             eclair_compiler: self.eclair_compiler,
             datalog_dir: self.datalog_dir,
-            eclair_file: WithEclairFile(path.into()),
+            eclair_file: WithEclairFile(path),
         }
     }
 }
 
-impl<T> Build<T> {
-    pub fn eclair(mut self, path: impl Into<String>) -> Self {
-        self.eclair_compiler = path.into();
+impl<'a, T> Build<'a, T> {
+    pub fn eclair(mut self, path: &'a str) -> Self {
+        self.eclair_compiler = path;
         self
     }
 
     // NOTE: for now we only allow clang since that is supported by cc crate.
     // Technically just llc could also work.
-    pub fn clang(mut self, path: impl Into<String>) -> Self {
-        self.clang_compiler = path.into();
+    pub fn clang(mut self, path: &'a str) -> Self {
+        self.clang_compiler = path;
         self
     }
 
-    pub fn datalog_dir(mut self, path: impl Into<String>) -> Self {
-        self.datalog_dir = path.into().into();
+    pub fn datalog_dir(mut self, path: &'a str) -> Self {
+        self.datalog_dir = path.into();
         self
     }
 }
 
-impl Build<WithEclairFile> {
+impl<'a> Build<'a, WithEclairFile<'a>> {
     pub fn compile(self) {
         self.check_valid_setup();
         let llvm_output_file = self.eclair_compile();
@@ -93,8 +92,8 @@ impl Build<WithEclairFile> {
     }
 
     fn llvm_compile(self, llvm_file: std::path::PathBuf) {
-        // TODO allow specifying another library name, right now libeclair.a is forced because of
-        // how eclair_bindings crate works
+        // TODO allow specifying another library name, right now libeclair.a
+        // is forced because of how eclair_bindings crate works..
         let lib_name = "eclair";
         cc::Build::new()
             .compiler(self.clang_compiler)
