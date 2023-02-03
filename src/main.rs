@@ -61,6 +61,9 @@ impl<'a, T> Build<'a, T> {
 impl<'a> Build<'a, WithEclairFile<'a>> {
     pub fn compile(self) {
         self.check_valid_setup();
+
+        println!("cargo:rerun-if-changed={}", self.eclair_file.0);
+
         let llvm_output_file = self.eclair_compile();
         self.llvm_compile(llvm_output_file);
     }
