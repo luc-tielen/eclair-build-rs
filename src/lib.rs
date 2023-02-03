@@ -8,10 +8,10 @@ use std::path::Path;
 use std::process::Command;
 use which::which;
 
-struct NoFileYet;
-struct WithEclairFile<'a>(&'a str);
+pub struct NoFileYet;
+pub struct WithEclairFile<'a>(&'a str);
 
-struct Build<'a, T = NoFileYet> {
+pub struct Build<'a, T = NoFileYet> {
     clang_compiler: &'a str,
     eclair_compiler: &'a str,
     datalog_dir: Option<&'a str>, // TODO remove once Eclair is fully self-hosted
@@ -108,14 +108,4 @@ impl<'a> Build<'a, WithEclairFile<'a>> {
         let out_dir = env::var("OUT_DIR").unwrap();
         Path::new(&out_dir).join("program.ll")
     }
-}
-
-// TODO convert to library, remove main
-fn main() {
-    Build::new()
-        .eclair("/path/to/eclair")
-        .datalog_dir("/path/to/datalog_dir")
-        .clang("clang-14")
-        .file("/path/to/test.eclair")
-        .compile();
 }
