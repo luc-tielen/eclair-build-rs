@@ -1,0 +1,17 @@
+[package]
+name = "eclair-rs"
+version = "0.1.0"
+edition = "2021"
+license = "BSD-3-Clause"
+repository = "https://github.com/luc-tielen/eclair-rs"
+homepage = "https://github.com/luc-tielen/eclair-rs"
+readme = "README.md"
+description = """
+A build-time dependency to assist in invoking the Eclair compiler
+to link Eclair code as a static archive with Rust code.
+"""
+keywords = ["build-dependencies"]
+categories = ["development-tools::build-utils"]
+
+[dependencies]
+
